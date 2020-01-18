@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"strconv"
+    "fmt"
+    "strconv"
 )
 func main() {
 
@@ -105,5 +105,16 @@ func main() {
     t = strconv.QuoteRune(s[1])
     fmt.Printf("%v, %T\n", t, t) // '건', string
 
+    // As indexing a string (using for loop on it) accesses individual bytes, not characters.
+    for x:=0; x<len(o); x++ {
+        fmt.Printf("%v, %T\n", o[x], o[x])
+    }
 
+    fmt.Println(" ")
+
+    // If you use range within a for loop,
+    // range will return rune and byte index of the character.
+    for index,char := range o {
+        fmt.Printf("index: %v, val: %v ,char: %c and its type: %T\n", index, char, char, char)
+    }
 }
