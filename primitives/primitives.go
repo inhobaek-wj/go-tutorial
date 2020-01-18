@@ -114,7 +114,19 @@ func main() {
 
     // If you use range within a for loop,
     // range will return rune and byte index of the character.
+    // range on strings iterates over Unicode code points.
+    // The first value is the starting byte index of the rune and the second the rune itself.
     for index,char := range o {
         fmt.Printf("index: %v, val: %v ,char: %c and its type: %T\n", index, char, char, char)
+    }
+
+    fmt.Println(" ")
+    for _,char := range o {
+        fmt.Println(char)
+    }
+
+    fmt.Println(" ")
+    for _,char := range o {
+        fmt.Println(strconv.QuoteRune(char))
     }
 }
