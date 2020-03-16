@@ -4,6 +4,7 @@ import (
     "database/sql"
     "fmt"
     "log"
+    "time"
 
     _ "github.com/lib/pq"
 )
@@ -26,9 +27,15 @@ func main() {
 
     log.Println("test begin...")
 
-    DoSomethingWithDBNotClose(db)
-    DoSomethingWithDBNotClose(db)
+    go func() {
+        DoSomethingWithDBNotClose(db, "first")
+    }()
 
+    go func() {
+        DoSomethingWithDBNotClose(db, "second")
+    }()
+
+    time.Sleep(time.Second * 6)
     log.Println("test is done...")
 }
 
@@ -56,7 +63,7 @@ func ConnectToDB() *sql.DB{
     return db
 }
 
-func DoSomethingWithDBNotClose(db *sql.DB) {
+func DoSomethingWithDBNotClose(db *sql.DB, text string) {
     log.Println("DoSomethingWithDBNotclose is called")
 
     stat := db.Stats()
@@ -67,12 +74,11 @@ func DoSomethingWithDBNotClose(db *sql.DB) {
     sqlStatement :=
         `select * from test`
 
-    _, err := db.Query(sqlStatement)
+    rows, err := db.Query(sqlStatement)
     if err != nil {
         fmt.Println(err)
     }
 
-    log.Println("DoSomethingWithDBNotclose end...")
     // I'm not gonna close connection.
     // for rows.Next() {}
     // rows.Close()
@@ -95,5 +101,46 @@ db stat OpenConnections: 1
 db stat InUse: 1
 db stat Idle: 0
 */
+    time.Sleep(time.Second * 2)
+    for rows.Next() {
+        fmt.Println("row is scaned from " + text)
+    }
 
+    log.Println("DoSomethingWithDBNotclose end...")
+
+    /*
+return connection after 2 seconds, then second statement is excuted.
+
+    2020/03/16 18:46:36 Successfully connected to DB!
+db stat waitDuration: 0s
+db stat WaitCount: 0
+2020/03/16 18:46:36 test begin...
+2020/03/16 18:46:36 DoSomethingWithDBNotclose is called
+db stat OpenConnections: 1
+db stat InUse: 0
+db stat Idle: 1
+2020/03/16 18:46:36 DoSomethingWithDBNotclose is called
+db stat OpenConnections: 1
+db stat InUse: 1
+db stat Idle: 0
+row is scaned from first
+row is scaned from first
+row is scaned from first
+row is scaned from first
+row is scaned from first
+row is scaned from first
+row is scaned from first
+row is scaned from first
+2020/03/16 18:46:38 DoSomethingWithDBNotclose end...
+row is scaned from second
+row is scaned from second
+row is scaned from second
+row is scaned from second
+row is scaned from second
+row is scaned from second
+row is scaned from second
+row is scaned from second
+2020/03/16 18:46:40 DoSomethingWithDBNotclose end...
+2020/03/16 18:46:42 test is done...
+    */
 }
